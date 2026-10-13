@@ -1,0 +1,69 @@
+
+==============================================================================
+Bước 3 · SILVER FRAMES: video thành khung hình, cờ chất lượng, join theo event time
+==============================================================================
+  đã xử lý 26 trip, tổng 1246 khung hình (mỗi trip một partition)
+  dbt run (trips + cờ + join): PASS=4 WARN=0 ERROR=0 SKIP=0
+  dbt test: PASS=8 WARN=0 ERROR=0 SKIP=0
+  {'silver.trips': {'rows': 26, 'version': 0}, 'silver.frames_flagged': {'rows': 1246, 'version': 0}, 'silver.frame_telemetry': {'rows': 1246, 'version': 0}}
+
+> Khung hình đi đâu (một khung có thể bị nhiều cờ)
+drive_id  tong  den  mo  toi_giu_lai  trung  mat_dong_bo
+--------  ----  ---  --  -----------  -----  -----------
+drive_a   602   6    9   4            149    7          
+drive_b   644   4    0   61           53     7          
+
+> Độ trễ đồng bộ giữa khung hình và telemetry (ms)
+drive_id  tb_ms  toi_da_ms
+--------  -----  ---------
+drive_a   66.0   2884     
+drive_b   73.0   3112     
+
+CẦN THẤY: drive A có 6 khung đen, drive B có 4; 'tối_giữ_lại' của B lớn (đường hầm, bóng râm): tối KHÔNG phải đen và không bị bỏ; khung trùng nhiều (xe chạy chậm, camera đứng hình 6 giây ở A); độ trễ đồng bộ trung bình nhỏ.
+
+--- Kiểm tra tự động của module 3 (verify --module 3) ---
+
+Module 3 · silver frames
+  PASS  frame_id unique                                   1246 frames
+  PASS  black frames detected (drive_a)                   6/6
+  PASS  black frames detected (drive_b)                   4/4
+  PASS  blurry frames detected (drive_a)                  8/8
+  PASS  frozen camera = near-duplicate frames (drive_a)   11/12
+  PASS  low-light frames flagged but not black (drive_b)  10/10
+
+6/6 checks passed
+{"ok": true}
+
+=== unit test ===
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.075s
+
+OK
+=== exp idempotency ===
+THÍ NGHIỆM 1 · Chạy lại partition trip-00003
+
+Cách của pipeline (Delta overwrite theo predicate trip_id):
+  trước : 1246 dòng, dấu vân tay 6c7480dfde7e
+  sau 2 lần chạy lại: 1246 dòng, dấu vân tay 6c7480dfde7e   -> KHÔNG ĐỔI
+
+Cách sai (append, chạy 2 lần, chỉ một trip): 120 dòng cho một trip có 60 khung -> NHÂN ĐÔI (2x)
+
+bằng chứng đã ghi: /opt/lab/report/evidence/idempotency.json
+{"ok": true}
+
+=== exp threshold ===
+THÍ NGHIỆM 4 · Độ nhạy của ngưỡng khung trùng (dHash, số bit được phép khác)
+
+drive_id  tong_khung  t0  t1   t2   t4   t6   t8 
+--------  ----------  --  ---  ---  ---  ---  ---
+drive_a   602         61  109  149  269  363  438
+drive_b   644         8   23   53   137  244  348
+
+Đọc: t2 là ngưỡng đang dùng. Ngưỡng cao thì loại nhiều khung hơn (có thể loại cả khung khác nhau thật), ngưỡng thấp thì giữ lại cả khung gần như trùng.
+
+bằng chứng đã ghi: /opt/lab/report/evidence/threshold.json
+{"ok": true}
+
+=== history silver.frames ===
+[{"version": 27, "operation": "WRITE", "rows_added": 60, "predicate": "trip_id = 'trip-00003'"}, {"version": 26, "operation": "WRITE", "rows_added": 60, "predicate": "trip_id = 'trip-00003'"}, {"version": 25, "operation": "WRITE", "rows_added": 41, "predicate": "trip_id = 'trip-09608'"}, {"version": 24, "operation": "WRITE", "rows_added": 37, "predicate": "trip_id = 'trip-09209'"}, {"version": 23, "operation": "WRITE", "rows_added": 60, "predicate": "trip_id = 'trip-08888'"}, {"version": 22, "operation": "WRITE", "rows_added": 60, "predicate": "trip_id = 'trip-08448'"}, {"version": 21, "operation": "WRITE", "rows_added": 30, "predicate": "trip_id = 'trip-07900'"}, {"version": 20, "operation": "WRITE", "rows_added": 34, "predicate": "trip_id = 'trip-07774'"}]
