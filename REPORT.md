@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| Họ và tên | Hieu Pham |
+| Họ và tên | Pham Minh Hieu |
 | MSSV (đúng bằng `LAB_STUDENT_ID` trong `.env`) | `2A202602919` |
 | GitHub | BenKei-19 |
 | Trip dùng cho bài tập sập và chạy lại (xem GUIDE, bước 5) | `trip-08888` |
