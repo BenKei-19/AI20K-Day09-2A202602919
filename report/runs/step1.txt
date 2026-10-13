@@ -1,0 +1,47 @@
+đã xoá 2343 đối tượng trong lake
+
+==============================================================================
+Bước 1 · BRONZE: ghi nguyên bản, chỉ thêm, chạy lại không đổi gì
+==============================================================================
+  {'drive': 'drive_a', 'video': 'ingested', 'telemetry_rows': 3021}
+  {'drive': 'drive_b', 'video': 'ingested', 'telemetry_rows': 3234}
+  {'trips': 26}
+  (chạy lại ngay một lần nữa, mọi thứ phải báo 'already present'):
+  {'drive': 'drive_a', 'video': 'already present', 'telemetry_rows': 'already present'}
+
+> Số dòng của từng bảng bronze
+bang             so_dong
+---------------  -------
+raw_telemetry_a  3021   
+raw_telemetry_b  3234   
+trips_raw        26     
+video_files      2      
+
+> Hai nguồn telemetry khác nhau thế nào (3 dòng đầu mỗi bảng, cột thô)
+ts_utc                    speed_mps  heading_deg  lat        lon        alt_m  acc_x  acc_y  gas    brake  steer   drive_id  _source_file     _batch_id     _row_no  _ingested_at                    
+------------------------  ---------  -----------  ---------  ---------  -----  -----  -----  -----  -----  ------  --------  ---------------  ------------  -------  --------------------------------
+2025-10-07T08:00:00.014Z  1.213      292.3385     48.582375  13.396210  48.6   0.360  0.380  0.028  0.000  -0.553  drive_a   telemetry_a.csv  17f098d6bbb1  0        2026-10-13 01:59:43.454389+00:00
+2025-10-07T08:00:00.091Z  1.224      293.8495     48.582375  13.396208  48.6   0.390  0.500  0.047  0.000  -0.553  drive_a   telemetry_a.csv  17f098d6bbb1  1        2026-10-13 01:59:43.454389+00:00
+timestamp_ms   spd_kmh  hdg      latitude   longitude  altitude  ax     ay      throttle_pct  brake_pct  steering  drive_id  _source_file     _batch_id     _row_no  _ingested_at                    
+-------------  -------  -------  ---------  ---------  --------  -----  ------  ------------  ---------  --------  --------  ---------------  ------------  -------  --------------------------------
+1759933801509  55.11    80.6009  48.577030  13.454629  48.6      0.140  -0.420  2.0           0.0        -0.009    drive_b   telemetry_b.csv  844e983d0ded  0        2026-10-13 01:59:44.081402+00:00
+1759933801590  54.95    79.4354  48.577034  13.454650  48.6      0.220  -0.490  2.0           0.0        -0.009    drive_b   telemetry_b.csv  844e983d0ded  1        2026-10-13 01:59:44.081402+00:00
+
+CẦN THẤY: 3021 dòng (A) và 3234 dòng (B); B dùng tên cột, đơn vị và timestamp khác A; chạy lại không thêm dòng nào.
+
+--- Kiểm tra tự động của module 1 (verify --module 1) ---
+
+Module 1 · bronze
+  PASS  bronze raw_telemetry rows == CSV rows (drive_a)  csv=3021
+  PASS  bronze raw_telemetry rows == CSV rows (drive_b)  csv=3234
+  PASS  bronze keeps each video once (sha256 unique)     2 rows
+  PASS  bronze video sha256 matches the original file    
+  PASS  bronze trips == 26                               
+
+5/5 checks passed
+{"ok": true}
+drive_id  telemetry_clock_offset_ms  sha256                                  
+--------  -------------------------  ----------------------------------------
+drive_b   1500                       bfa62703f645ff77a8578ae3fc74a00881140d38
+drive_a   0                          636ba1a98dfc5ba665d1c935e1d2064e69f4df36
+[{"version": 0, "operation": "WRITE", "rows_added": 3021, "predicate": null}]
