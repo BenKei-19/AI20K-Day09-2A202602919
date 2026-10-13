@@ -16,7 +16,7 @@
 - `dataset_version` của bạn: `971be7e3a807`  (phải khớp `report/evidence/run_summary.json`)
 - Số khung hình train / val / test của bạn: 678 / 147 / 194 (tổng 1019 khung; 18 / 4 / 4 trip)
 - `report/verify.txt`: tạo bằng `python3 scripts/check_submission.py --save-verify` (phải có `27/27 checks passed`).
-- Ảnh chụp trong `report/screenshots/`: `airflow_graph.png`, `minio_lake.png`, `metabase_dashboard.png`, và ảnh bài tập sập/chạy lại (log task đỏ thấy trip của bạn).
+- Ảnh chụp trong `report/screenshots/`: `airflow_graph.png` (run `crash_1` xanh sau khi clear), `minio_lake.png`, `metabase_dashboard.png` (có 2 câu hỏi riêng ở cuối), `airflow_crash_log_trip-08888.png` (log attempt 1 đỏ: `simulated crash while extracting trip-08888`), `airflow_rerun_attempt2_success.png` (attempt 2 xanh: `{"trip": "trip-08888", "frames": 60}`).
 - Đầu ra thô của từng bước nằm trong `report/runs/` (`step1.txt` … `step5_crash_rerun.txt`, `final_step_all.txt`).
 
 ## Bước 1 · Bronze
