@@ -1,20 +1,7 @@
+['by_drive', 'by_split', 'created_at', 'dataset_version', 'frames', 'lineage', 'manifest_sha256', 'rules', 'trips_by_split']
 {
   "dataset_version": "971be7e3a807",
   "frames": 1019,
-  "by_split": {
-    "train": 678,
-    "test": 194,
-    "val": 147
-  },
-  "by_drive": {
-    "drive_a": 436,
-    "drive_b": 583
-  },
-  "trips_by_split": {
-    "test": 4,
-    "train": 18,
-    "val": 4
-  },
   "manifest_sha256": "937d2a87c2ba7264f25d99eb75f7720f40e4db0cadfec481a1678250080567e0",
   "rules": {
     "drop": [
@@ -30,7 +17,7 @@
     "bronze.raw_telemetry_b": 0,
     "bronze.trips_raw": 0,
     "bronze.video_files": 1,
-    "silver.frames": 27,
+    "silver.frames": 25,
     "silver.telemetry": 0,
     "silver.frames_flagged": 0,
     "silver.frame_telemetry": 0,
@@ -39,5 +26,5 @@
       "drive_a": "636ba1a98dfc5ba665d1c935e1d2064e69f4df360ff9ffbd15795957d5e7e9aa"
     }
   },
-  "created_at": "2026-10-13T02:02:06.594734+00:00"
+  "created_at": "2026-10-13T02:21:05.149319+00:00"
 }

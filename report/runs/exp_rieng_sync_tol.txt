@@ -1,0 +1,37 @@
+=== Thí nghiệm riêng: sync_tol_ms 150 (mặc định) so với 50 và 300 ===
+
+--- sync_tol_ms=150 ---
+02:18:42  Done. PASS=8 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=8
+drive_id  tong  lech_dong_bo
+--------  ----  ------------
+drive_a   602   7           
+drive_b   644   7           
+split  khung  trip
+-----  -----  ----
+test   194    4   
+train  678    18  
+val    147    4   
+
+--- sync_tol_ms=50 ---
+02:18:54  Done. PASS=8 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=8
+drive_id  tong  lech_dong_bo
+--------  ----  ------------
+drive_a   602   272         
+drive_b   644   328         
+split  khung  trip
+-----  -----  ----
+test   108    4   
+train  341    18  
+val    89     4   
+
+--- sync_tol_ms=300 ---
+02:19:04  Done. PASS=8 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=8
+drive_id  tong  lech_dong_bo
+--------  ----  ------------
+drive_a   602   7           
+drive_b   644   7           
+split  khung  trip
+-----  -----  ----
+test   194    4   
+train  678    18  
+val    147    4   
