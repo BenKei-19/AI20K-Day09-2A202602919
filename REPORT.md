@@ -4,19 +4,19 @@
 
 | | |
 |---|---|
-| Họ và tên | Pham Minh Hieu |
+| Họ và tên | Phạm Minh Hiếu |
 | MSSV (đúng bằng `LAB_STUDENT_ID` trong `.env`) | `2A202602919` |
 | GitHub | BenKei-19 |
-| Trip dùng cho bài tập sập và chạy lại (xem GUIDE, bước 5) | `trip-08888` |
+| Trip dùng cho bài tập sập và chạy lại (xem GUIDE, bước 5) | `trip-02736` |
 
-> Về trip: MSSV có chữ `A` nên `int(MSSV) % 26` trong GUIDE không chạy được. Mình bỏ ký tự không phải số: `2202602919 % 26 = 23`, và `list-trips[23] = trip-08888`.
+> Về trip: MSSV có chữ `A` nên `int(MSSV) % 26` trong GUIDE không chạy được. Mình dùng 5 số cuối của MSSV: `02919 % 26 = 7`, và `list-trips[7] = trip-02736`.
 
 ## Kết quả cuối
 
 - `dataset_version` của bạn: `971be7e3a807`  (phải khớp `report/evidence/run_summary.json`)
 - Số khung hình train / val / test của bạn: 678 / 147 / 194 (tổng 1019 khung; 18 / 4 / 4 trip)
 - `report/verify.txt`: tạo bằng `python3 scripts/check_submission.py --save-verify` (phải có `27/27 checks passed`).
-- Ảnh chụp trong `report/screenshots/`: `airflow_graph.png` (run `crash_1` xanh sau khi clear), `minio_lake.png`, `metabase_dashboard.png` (có 2 câu hỏi riêng ở cuối), `airflow_crash_log_trip-08888.png` (log attempt 1 đỏ: `simulated crash while extracting trip-08888`), `airflow_rerun_attempt2_success.png` (attempt 2 xanh: `{"trip": "trip-08888", "frames": 60}`).
+- Ảnh chụp trong `report/screenshots/`: `airflow_graph.png` (run `crash_2` xanh sau khi clear), `airflow_graph_failed_trip-02736.png` (cùng run lúc đỏ: 1 task đỏ, 7 task `upstream_failed`), `airflow_crash_log_trip-02736.png` (log attempt 1 đỏ: `simulated crash while extracting trip-02736`), `airflow_rerun_attempt2_success.png` (attempt 2 xanh: `{"trip": "trip-02736", "frames": 60}`), `minio_lake.png`, `metabase_dashboard.png` (có 2 câu hỏi riêng ở cuối).
 - Đầu ra thô của từng bước nằm trong `report/runs/` (`step1.txt` … `step5_crash_rerun.txt`, `final_step_all.txt`).
 
 ## Bước 1 · Bronze
@@ -61,7 +61,7 @@ Dựa vào `idempotency.json`: số dòng trước và sau hai lần chạy lạ
 
 Chạy lại partition `trip-00003` (60 khung) hai lần: trước **1246 dòng**, dấu vân tay `6c7480dfde7e`; sau hai lần chạy lại vẫn **1246 dòng**, `6c7480dfde7e` (`unchanged: true`). `history silver.frames` thấy hai commit mới (version 26, 27) đều là `WRITE` với `predicate trip_id = 'trip-00003'`, `rows_added 60`: mỗi lần **thay** đúng 60 dòng của trip đó. Cách ghi `append` sai, chạy 2 lần, cho **120 dòng** cho một trip 60 khung, tức **nhân đôi**.
 
-Delta `overwrite` với predicate là **một commit nguyên tử**: việc gỡ file cũ của trip và thêm file mới nằm trong cùng một mục của transaction log. Người đọc chỉ thấy phiên bản cũ hoặc mới, không bao giờ thấy trạng thái nửa vời. Nếu lỗi xảy ra giữa chừng thì không có commit, bảng giữ nguyên phiên bản trước. Mình thấy đúng điều này ở bài tập sập: ngay sau khi trip-08888 sập, `silver.frames` có 1186 dòng, trip-08888 = 0 dòng, không có dòng rác. Xoá rồi ghi lại là **hai** thao tác: sập ở giữa thì partition mất trắng hoặc ghi dở, người đọc đồng thời thấy "lỗ", và muốn sửa phải tự dọn. Ngoài ra Delta còn giữ phiên bản cũ để time travel nếu ghi nhầm.
+Delta `overwrite` với predicate là **một commit nguyên tử**: việc gỡ file cũ của trip và thêm file mới nằm trong cùng một mục của transaction log. Người đọc chỉ thấy phiên bản cũ hoặc mới, không bao giờ thấy trạng thái nửa vời. Nếu lỗi xảy ra giữa chừng thì không có commit, bảng giữ nguyên phiên bản trước. Mình thấy đúng điều này ở bài tập sập: ngay sau khi trip-02736 sập, `silver.frames` có 1186 dòng, trip-02736 = 0 dòng, không có dòng rác. Xoá rồi ghi lại là **hai** thao tác: sập ở giữa thì partition mất trắng hoặc ghi dở, người đọc đồng thời thấy "lỗ", và muốn sửa phải tự dọn. Ngoài ra Delta còn giữ phiên bản cũ để time travel nếu ghi nhầm.
 
 ### Câu 5
 Khung hình **đen** và khung hình **tối** khác nhau thế nào, pipeline xử lý khác nhau ra sao, bạn có đồng ý không? Dựa vào `threshold.json`: nếu chọn ngưỡng 0, 2, 6 thì bao nhiêu khung bị coi là trùng ở mỗi drive? Bạn chọn ngưỡng nào, vì sao, và ngưỡng đó phụ thuộc vào tốc độ xe thế nào?
@@ -102,9 +102,9 @@ Mình chạy 5 lần (step all đầu tiên, step 4, `cli export-dataset` chạy
 ### Câu 9
 Mô tả chính xác điều xảy ra khi trip của bạn sập rồi chạy lại: bao nhiêu task chuyển đỏ, bao nhiêu task `upstream_failed`, bạn clear gì, dữ liệu có nhân đôi không, `dataset_version` có đổi không? Bằng chứng (ảnh, số) là gì?
 
-Với `LAB_FAIL_ONCE=trip-08888`, sau `day09_reset` rồi `day09_video_pipeline` (run `crash_1`, 37 task instance): **1 task đỏ** là `silver_frames` map_index 23. Log attempt 1 ghi `RuntimeError: simulated crash while extracting trip-08888; run it again`. Có **7 task `upstream_failed`** (`dbt_run_silver`, `dbt_test_silver`, `dbt_run_gold`, `dbt_test_gold`, `publish_lake`, `export_dataset`, `publish_warehouse`) và 29 task success: 25 trip khác (kể cả map 24, 25 chạy sau trip hỏng), 3 task bronze và `trip_commands`. Ngay sau khi sập, `silver.frames` có 1186 = 1246 − 60 dòng, trip-08888 = 0 dòng: không có dữ liệu ghi dở.
+Với `LAB_FAIL_ONCE=trip-02736`, sau `day09_reset` rồi `day09_video_pipeline` (run `crash_2`, 37 task instance): **1 task đỏ** là `silver_frames` map_index 7. Log attempt 1 ghi `RuntimeError: simulated crash while extracting trip-02736; run it again`. Có **7 task `upstream_failed`** (`dbt_run_silver`, `dbt_test_silver`, `dbt_run_gold`, `dbt_test_gold`, `publish_lake`, `export_dataset`, `publish_warehouse`) và 29 task success: 25 trip khác (vẫn chạy xong dù trip-02736 hỏng), 3 task bronze và `trip_commands`. Ngay sau khi sập, `silver.frames` có 1186 = 1246 − 60 dòng, trip-02736 = 0 dòng: không có dữ liệu ghi dở.
 
-Mình chỉ clear task đỏ cùng các task downstream đang `upstream_failed` (`airflow tasks clear -t ^silver_frames$ --only-failed --downstream`, tương đương nút Clear trên giao diện). Có **8 task chạy lại**, chỉ map_index 23 có `attempt=2.log` (27 file log cho 26 trip). 25 trip đã xong **không** chạy lại. DAG chuyển xanh (37/37 success). Sau đó `silver.frames` có 1246 dòng, trip-08888 = 60, và 1246 `frame_id` khác nhau: **không nhân đôi**. `verify` cho 27/27, `dataset_version` **vẫn `971be7e3a807`**. Bằng chứng: `report/runs/step5_crash_rerun.txt`, `report/runs/crash_trip-08888_attempt1.log`, và ảnh `report/screenshots/`.
+Mình chỉ clear task đỏ cùng các task downstream đang `upstream_failed` (`airflow tasks clear -t ^silver_frames$ --only-failed --downstream`, tương đương nút Clear trên giao diện). Có **8 task chạy lại**, chỉ map_index 7 có `attempt=2.log` (27 file log cho 26 trip). 25 trip đã xong **không** chạy lại. DAG chuyển xanh (37/37 success). Sau đó `silver.frames` có 1246 dòng, trip-02736 = 60, và 1246 `frame_id` khác nhau: **không nhân đôi**. `verify` cho 27/27, `dataset_version` **vẫn `971be7e3a807`**. Bằng chứng: `report/runs/step5_crash_rerun.txt`, `report/runs/crash_trip-02736_attempt1.log`, và 4 ảnh Airflow trong `report/screenshots/`.
 
 ### Câu 10
 Nâng từ 2 drive lên **500 xe mỗi ngày**: ba thành phần nào của pipeline này sẽ vỡ đầu tiên, và bạn thay bằng gì (nối với slide 12, 22, 23)?

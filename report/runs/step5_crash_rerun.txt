@@ -1,19 +1,18 @@
-=== Bài tập sập và chạy lại: LAB_FAIL_ONCE=trip-08888 (MSSV 2A202602919 -> bỏ chữ -> 2202602919 % 26 = 23) ===
+=== Bài tập sập và chạy lại: LAB_FAIL_ONCE=trip-02736 (5 số cuối MSSV 02919 -> 2919 % 26 = 7 -> list-trips[7]) ===
 
---- run crash_1, lần chạy đầu: trạng thái task ---
-1 failed: silver_frames map_index=23 (trip-08888); 7 upstream_failed: dbt_run_silver dbt_test_silver dbt_run_gold dbt_test_gold publish_lake export_dataset publish_warehouse; 28 success
+--- run crash_2, lần chạy đầu: trạng thái task ---
+1 failed: silver_frames map_index=7 (trip-02736); 7 upstream_failed: dbt_run_silver dbt_test_silver dbt_run_gold dbt_test_gold publish_lake export_dataset publish_warehouse; 29 success
 
 --- log attempt=1 của task đỏ ---
-[2026-10-13T02:09:42.873+0000] {subprocess.py:88} INFO - Running command: ['/usr/bin/bash', '-c', 'cd /opt/*** && /home/airflow/***-venv/bin/python -m pipeline.cli extract --trip trip-08888']
-[2026-10-13T02:09:43.718+0000] {subprocess.py:106} INFO -     raise RuntimeError(f"simulated crash while extracting {trip_id}; run it again")
-[2026-10-13T02:09:43.718+0000] {subprocess.py:106} INFO - RuntimeError: simulated crash while extracting trip-08888; run it again
-[2026-10-13T02:09:43.770+0000] {subprocess.py:110} INFO - Command exited with return code 1
+[2026-10-13T03:11:02.939+0000] {subprocess.py:88} INFO - Running command: ['/usr/bin/bash', '-c', 'cd /opt/*** && /home/airflow/***-venv/bin/python -m pipeline.cli extract --trip trip-02736']
+[2026-10-13T03:11:03.929+0000] {subprocess.py:106} INFO -     raise RuntimeError(f"simulated crash while extracting {trip_id}; run it again")
+[2026-10-13T03:11:03.929+0000] {subprocess.py:106} INFO - RuntimeError: simulated crash while extracting trip-02736; run it again
 
 --- silver.frames ngay sau khi sập (trước khi clear) ---
-tong=1186 trip_08888=0
+tong=1186 trip_02736=0
 
---- sau khi clear chỉ task đỏ (--only-failed --downstream): DAG success, 37 task success; chỉ map_index=23 có attempt=2.log ---
-tong  trip_08888  frame_id_khac_nhau
+--- sau khi clear chỉ task đỏ (--only-failed --downstream): DAG success, 37 task success; chỉ map_index=7 có attempt=2.log ---
+tong  trip_02736  frame_id_khac_nhau
 ----  ----------  ------------------
 1246  60          1246              
 dataset_version  khung
