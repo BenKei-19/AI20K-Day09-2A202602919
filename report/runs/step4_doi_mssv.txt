@@ -1,0 +1,24 @@
+=== LAB_STUDENT_ID=2024000 (thử) ===
+  {"dataset_version": "8fc131884584", "frames": 1019, "by_split": {"val": 182, "test": 134, "train": 703}, "trips_by_split": {"train": 18, "test": 4, "val": 4}}
+drive_a   train  301         9     43.0         
+drive_a   val    82          2     40.0         
+drive_a   test   53          2     22.0         
+drive_b   train  402         9     62.0         
+drive_b   val    100         2     90.0         
+drive_b   test   81          2     86.0         
+MSSV dùng để chia split: 2024000
+CẦN THẤY: mỗi drive có đủ train, val, test; một trip chỉ nằm trong MỘT split; dataset_version là chuỗi 12 ký tự (đổi MSSV thì đổi version).
+  PASS  one dataset_version, manifest.json agrees with the table              version 8fc131884584
+
+=== LAB_STUDENT_ID=2A202602919 (đặt lại MSSV của mình) ===
+  {"dataset_version": "971be7e3a807", "frames": 1019, "by_split": {"train": 678, "test": 194, "val": 147}, "trips_by_split": {"test": 4, "train": 18, "val": 4}}
+drive_a   train  272         9     29.0         
+drive_a   val    58          2     44.0         
+drive_a   test   106         2     65.0         
+drive_b   train  406         9     71.0         
+drive_b   val    89          2     64.0         
+drive_b   test   88          2     75.0         
+MSSV dùng để chia split: 2A202602919
+CẦN THẤY: mỗi drive có đủ train, val, test; một trip chỉ nằm trong MỘT split; dataset_version là chuỗi 12 ký tự (đổi MSSV thì đổi version).
+  PASS  one dataset_version, manifest.json agrees with the table              version 971be7e3a807
+7/7 checks passed

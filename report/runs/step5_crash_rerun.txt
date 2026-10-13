@@ -1,0 +1,62 @@
+=== Bài tập sập và chạy lại: LAB_FAIL_ONCE=trip-08888 (MSSV 2A202602919 -> bỏ chữ -> 2202602919 % 26 = 23) ===
+
+--- run crash_1, lần chạy đầu: trạng thái task ---
+1 failed: silver_frames map_index=23 (trip-08888); 7 upstream_failed: dbt_run_silver dbt_test_silver dbt_run_gold dbt_test_gold publish_lake export_dataset publish_warehouse; 28 success
+
+--- log attempt=1 của task đỏ ---
+[2026-10-13T02:09:42.873+0000] {subprocess.py:88} INFO - Running command: ['/usr/bin/bash', '-c', 'cd /opt/*** && /home/airflow/***-venv/bin/python -m pipeline.cli extract --trip trip-08888']
+[2026-10-13T02:09:43.718+0000] {subprocess.py:106} INFO -     raise RuntimeError(f"simulated crash while extracting {trip_id}; run it again")
+[2026-10-13T02:09:43.718+0000] {subprocess.py:106} INFO - RuntimeError: simulated crash while extracting trip-08888; run it again
+[2026-10-13T02:09:43.770+0000] {subprocess.py:110} INFO - Command exited with return code 1
+
+--- silver.frames ngay sau khi sập (trước khi clear) ---
+tong=1186 trip_08888=0
+
+--- sau khi clear chỉ task đỏ (--only-failed --downstream): DAG success, 37 task success; chỉ map_index=23 có attempt=2.log ---
+tong  trip_08888  frame_id_khac_nhau
+----  ----------  ------------------
+1246  60          1246              
+dataset_version  khung
+---------------  -----
+971be7e3a807     1019 
+
+
+Module 1 · bronze
+  PASS  bronze raw_telemetry rows == CSV rows (drive_a)                          csv=3021
+  PASS  bronze raw_telemetry rows == CSV rows (drive_b)                          csv=3234
+  PASS  bronze keeps each video once (sha256 unique)                             2 rows
+  PASS  bronze video sha256 matches the original file                            
+  PASS  bronze trips == 26                                                       
+
+Module 2 · silver telemetry
+  PASS  quarantine counts match raw CSV (drive_a)                                expected={'duplicate': 20, 'speed_missing': 30, 'speed_out_of_range': 3} got={'duplicate': 20, 'speed_missing': 30, 'speed_out_of_range': 3}
+  PASS  clean + quarantined == received (drive_a)                                2968+53=3021
+  PASS  quarantine counts match raw CSV (drive_b)                                expected={'duplicate': 20, 'speed_missing': 30, 'speed_out_of_range': 3} got={'duplicate': 20, 'speed_missing': 30, 'speed_out_of_range': 3}
+  PASS  clean + quarantined == received (drive_b)                                3181+53=3234
+  PASS  no duplicate (drive, ts) in silver telemetry                             
+  PASS  all speeds in 0..70 m/s                                                  
+  PASS  drive B clock offset removed (first sample within 0.5 s of video start)  2025-10-08 14:30:00.009000+00:00
+
+Module 3 · silver frames
+  PASS  frame_id unique                                                          1246 frames
+  PASS  black frames detected (drive_a)                                          6/6
+  PASS  black frames detected (drive_b)                                          4/4
+  PASS  blurry frames detected (drive_a)                                         8/8
+  PASS  frozen camera = near-duplicate frames (drive_a)                          11/12
+  PASS  low-light frames flagged but not black (drive_b)                         10/10
+
+Module 4 · gold dataset
+  PASS  gold has frames in every split                                           1019 frames
+  PASS  no trip is in two splits (no leakage)                                    26 trips
+  PASS  every drive appears in train, val and test                               
+  PASS  gold contains no black / blurry / near-duplicate / out-of-sync frame     
+  PASS  one dataset_version, manifest.json agrees with the table                 version 971be7e3a807
+  PASS  manifest lists upstream table versions (lineage)                         
+  PASS  every manifest image exists under the dataset version folder             
+
+Module 5 · warehouse
+  PASS  warehouse has the six marts                                              {'mart_trip_summary': 26, 'mart_telemetry_quality': 2, 'mart_split_balance': 3, 'mart_speed_coverage': 7, 'mart_frame_gallery': 1019, 'mart_frame_funnel': 2}
+  PASS  warehouse gallery rows == gold frames                                    
+
+27/27 checks passed
+{"ok": true}
