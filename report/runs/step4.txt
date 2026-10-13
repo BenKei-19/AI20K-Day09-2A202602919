@@ -1,0 +1,49 @@
+
+==============================================================================
+Bước 4 · GOLD: dataset huấn luyện, chia theo trip, có phiên bản
+==============================================================================
+  dbt run (gold): PASS=2 WARN=0 ERROR=0 SKIP=0
+  dbt test (gồm test chống rò rỉ split): PASS=7 WARN=0 ERROR=0 SKIP=0
+  {"dataset_version": "971be7e3a807", "frames": 1019, "by_split": {"train": 678, "test": 194, "val": 147}, "trips_by_split": {"val": 4, "test": 4, "train": 18}}
+
+> Mỗi split có bao nhiêu khung hình và trip, ở từng drive
+drive_id  split  khung_hinh  trip  toc_do_tb_kmh
+--------  -----  ----------  ----  -------------
+drive_a   train  272         9     29.0         
+drive_a   val    58          2     44.0         
+drive_a   test   106         2     65.0         
+drive_b   train  406         9     71.0         
+drive_b   val    89          2     64.0         
+drive_b   test   88          2     75.0         
+
+MSSV dùng để chia split: 2A202602919
+CẦN THẤY: mỗi drive có đủ train, val, test; một trip chỉ nằm trong MỘT split; dataset_version là chuỗi 12 ký tự (đổi MSSV thì đổi version).
+
+--- Kiểm tra tự động của module 4 (verify --module 4) ---
+
+Module 4 · gold dataset
+  PASS  gold has frames in every split                                        1019 frames
+  PASS  no trip is in two splits (no leakage)                                 26 trips
+  PASS  every drive appears in train, val and test                            
+  PASS  gold contains no black / blurry / near-duplicate / out-of-sync frame  
+  PASS  one dataset_version, manifest.json agrees with the table              version 971be7e3a807
+  PASS  manifest lists upstream table versions (lineage)                      
+  PASS  every manifest image exists under the dataset version folder          
+
+7/7 checks passed
+{"ok": true}
+
+=== export-dataset (chạy lại) ===
+{"dataset_version": "971be7e3a807", "frames": 1019, "by_split": {"train": 678, "test": 194, "val": 147}, "trips_by_split": {"test": 4, "train": 18, "val": 4}, "manifest_sha256": "937d2a87c2ba7264f25d99eb75f7720f40e4db0cadfec481a1678250080567e0"}
+
+=== exp leakage ===
+THÍ NGHIỆM 3 · Chia theo khung hình có làm rò rỉ không?
+
+Khung hình đáng dùng: 1019, thuộc 26 trip
+Chia THEO KHUNG HÌNH (ngẫu nhiên 70/15/15): 26 trip nằm ở nhiều hơn một split, 26 trip có khung ở cả train lẫn test
+Chia THEO TRIP (gold của pipeline): 0 trip bị chia cắt
+
+Vì sao quan trọng: các khung liền nhau gần như giống hệt; nếu một nửa nằm ở train và nửa kia ở test, mô hình 'đã thấy' đề thi.
+
+bằng chứng đã ghi: /opt/lab/report/evidence/leakage.json
+{"ok": true}
